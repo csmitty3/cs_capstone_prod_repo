@@ -1,0 +1,10 @@
+bayesian_optimization==1.4.3
+Flask==2.0.3
+Flask_RESTful==0.3.10
+keras==2.9.0
+matplotlib==3.5.2
+numpy==1.23.3
+pandas==1.4.4
+Requests==2.31.0
+scikit_learn==1.2.2
+tensorflow==2.9.1
