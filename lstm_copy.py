@@ -1,6 +1,6 @@
 #standard imports
 import pandas as pd
-import datetime
+#import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -30,8 +30,10 @@ import unittest
 
 import requests
 import json
+from sql_extract import Extract_data
+from datetime import datetime, date, timedelta
 
-scaler=MinMaxScaler(feature_range=(0,1))
+#scaler=MinMaxScaler(feature_range=(0,1))
 
 #read data in
 def get_jsonparsed_data(url):
@@ -56,7 +58,7 @@ def get_jsonparsed_data(url):
 def str_to_datetime(s):
     split = s.split('-')
     year, month, day = int(split[0]), int(split[1]), int(split[2])
-    return datetime.datetime(year=year, month=month, day=day)
+    return datetime(year=year, month=month, day=day)
 
 def normal_df():
     api_key= 'dee9e143b1d0b3ce72ab2bf088fbfab9'
@@ -85,41 +87,28 @@ def normal_df():
 
 def create_df():
     scaler=MinMaxScaler(feature_range=(0,1))
-    api_key= 'dee9e143b1d0b3ce72ab2bf088fbfab9'
-    sp500='^GSPC'
-    url = (f"https://financialmodelingprep.com/api/v3/historical-price-full/{sp500}?apikey={api_key}")
-    dictionary = get_jsonparsed_data(url)
-
-    dates=[]
-    history = dictionary['historical']
-    for i in range(len(history)):
-        dates.insert(0, history[i]['date'])
-    
-    close=[]
-    for i in range(len(history)):
-        close.insert(0, history[i]['close'])
-
-    price_dict = {"Date": dates, "Close": close}
-    df = pd.DataFrame(price_dict)
+    df = Extract_data()
 
     #apply str_to_datetime
-    df['Date'] = df['Date'].apply(str_to_datetime)
+    #df['Date'] = df['Date'].apply(str_to_datetime)
 
     #set index
-    df.set_index('Date', inplace=True)
+    #df.set_index('Date', inplace=True)
 
     #minmax scaler
     scaledclose=scaler.fit_transform(np.array(df).reshape(-1,1))
     df['Close'] = scaledclose
-    df_new = df[['Close']]
+    df = df[['Close']]
     return df
 
 #Creating windowed dataframes
 def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3):
-
-    scaledclose=scaler.fit_transform(np.array(dataframe).reshape(-1,1))
-
-    dataframe['Close'] = scaledclose
+    if dataframe['Close'].values[0] > 1:
+        scaler=MinMaxScaler(feature_range=(0,1))
+        scaledclose=scaler.fit_transform(np.array(dataframe).reshape(-1,1))
+        dataframe['Close'] = scaledclose
+    else:
+        scaler = ''
 
     first_date = str_to_datetime(first_date_str)
 
@@ -145,12 +134,12 @@ def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3):
         X.append(x)
         Y.append(y)
 
-        next_week = dataframe.loc[target_date:target_date+datetime.timedelta(days=7)]
+        next_week = dataframe.loc[target_date:target_date+timedelta(days=7)]
         next_datetime_str = str(next_week.head(2).tail(1).index.values[0])
         next_date_str = next_datetime_str.split('T')[0]
         year_month_day = next_date_str.split('-')
         year, month, day = year_month_day
-        next_date = datetime.datetime(day=int(day), month=int(month), year=int(year))
+        next_date = datetime(day=int(day), month=int(month), year=int(year))
     
         if last_time:
             break
@@ -318,8 +307,14 @@ def recursive_predict(num, data, model, scaler):
 
 #function to run the whole script
 def mle_analysis():
-    df = create_df() 
-    windowed_df = df_to_windowed_df(df, '2022-01-03', '2022-06-21', n=5)
+    df= create_df()
+    today = date.today()-timedelta(days=1)
+    today = datetime.strftime(today, "%Y-%m-%d")
+    windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
+    #print(windowed_df)
+    #print(type(windowed_df))
+    #windowed_df = pd.DataFrame([windowed_df])
+    #print(type(windowed_df))
     dates, X, y = windowed_df_to_date_X_y(windowed_df)
     dates_train, X_train, y_train, dates_val, X_val, y_val, dates_test, X_test, y_test = split_train_val_test(dates, X, y)
     learning_rate, neurons, dropout_rate, activation = bayesian_optimization(X_train, y_train, X_val, y_val)

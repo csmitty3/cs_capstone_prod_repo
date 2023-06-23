@@ -5,7 +5,7 @@ import pandas as pd
 
 def Create_db():
     engine = create_engine("postgresql://eeedbjazwbtsbo:39d5efb393a525797a40aa4edefbce1680207d94ec798aa650a9ea1e481e8840@ec2-54-156-8-21.compute-1.amazonaws.com:5432/df050o1ta4o7ba", echo = False)
-    sql_create_script = "CREATE TABLE sp500(Date DATE PRIMARY KEY,Close NUMERIC);"
+    sql_create_script = "CREATE TABLE error(Date DATE PRIMARY KEY,Error NUMERIC);"
     with engine.connect() as conn:
         conn.execute(text(sql_create_script))
 
@@ -29,3 +29,4 @@ def Extract_data():
 #if __name__ == '__main__':
     #df = Extract_data()
     #print(type(df.index))
+    #Create_db()

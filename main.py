@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_restful import Api, Resource
 import pickle
 import os
+from datetime import date, datetime, timedelta
 import requests
 from sql_extract import Extract_data
 from lstm_copy import df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict, create_df
@@ -37,7 +38,9 @@ def predict():
     if request.method=='POST':
         num = int(request.form['preds'])
         df = Extract_data()
-        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', '2023-06-21', n=5)
+        today = date.today()-timedelta(days=1)
+        today = datetime.strftime(today, "%Y-%m-%d")
+        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
         dates, X, Y = windowed_df_to_date_X_y(windowed_df)
         with open('model.pkl', 'rb') as file:
             model = pickle.load(file)
