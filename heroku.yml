@@ -4,8 +4,7 @@ setup:
 build:
   docker:
     web: Dockerfile
-run: 
-  web: gunicorn main:welcome
+
 
 
 
