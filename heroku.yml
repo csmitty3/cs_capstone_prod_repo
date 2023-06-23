@@ -1,15 +1,10 @@
+setup:
+  addons:
+    - plan: heroku-postgresql
+      as: DATABASE
 build:
   docker:
     web: Dockerfile
-
-addons:
-  postgresql: "15.3"
-
-environments:
-  - name: production
-    addons:
-      - plan: heroku-postgresql
-        as: DATABASE
 run: 
   web: bundle exec puma -C config/puma.rb
 
