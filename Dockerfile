@@ -1,12 +1,9 @@
-FROM python:3.9.17
-
-# set the working directory
+FROM python:3.9
 WORKDIR /app
-
-# install dependencies
+#COPY requirements.txt .
 COPY . /app
 RUN pip install -r requirements.txt
 EXPOSE 5000
-
 # start the server
-CMD python ./main.py
+
+CMD ["python", "main.py"]
