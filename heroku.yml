@@ -10,7 +10,8 @@ environments:
     addons:
       - plan: heroku-postgresql
         as: DATABASE
-run: web: bundle exec puma -C config/puma.rb
+run: 
+  web: bundle exec puma -C config/puma.rb
 
 
 
