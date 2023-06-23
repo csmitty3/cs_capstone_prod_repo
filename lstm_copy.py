@@ -327,8 +327,4 @@ def mle_analysis():
     #unittest.main()
     pickle.dump(model, open('model.pkl', 'wb'))
 if __name__ == "__main__":
-    from sql_extract import Extract_data
-    df = Extract_data()
-    #print(df)
-    windowed_df = df_to_windowed_df(df, '2022-01-03', '2022-06-21', n=5)
-    print(windowed_df)
+    mle_analysis()
