@@ -16,7 +16,11 @@ app = Flask(__name__)
 api = Api(app)
 
 fig, ax = plt.subplots(figsize=(7,2.5), facecolor='lightblue')
-
+df = Extract_data()
+today = date.today()
+today = datetime.strftime(today, "%Y-%m-%d")
+windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
+dates, X, Y = windowed_df_to_date_X_y(windowed_df)
 
 @app.route('/')
 def welcome():
@@ -47,6 +51,7 @@ def visualize():
     return send_file(img, mimetype="img/png")
 
 
+
 #class PredictFive(Resource):
     #def get(self):
         #if request.method=='POST':
@@ -63,11 +68,11 @@ def visualize():
 def predict():
     if request.method=='POST':
         num = int(request.form['preds'])
-        df = Extract_data()
-        today = date.today()
-        today = datetime.strftime(today, "%Y-%m-%d")
-        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
-        dates, X, Y = windowed_df_to_date_X_y(windowed_df)
+        #df = Extract_data()
+        #today = date.today()
+        #today = datetime.strftime(today, "%Y-%m-%d")
+        #windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
+        #dates, X, Y = windowed_df_to_date_X_y(windowed_df)
         with open('model.pkl', 'rb') as file:
             model = pickle.load(file)
         recursive_predictions = recursive_predict(num, X, model, scaler)
