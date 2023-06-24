@@ -22,8 +22,8 @@ def Extract_data():
         database="df050o1ta4o7ba",
         user="eeedbjazwbtsbo",
         password="39d5efb393a525797a40aa4edefbce1680207d94ec798aa650a9ea1e481e8840") as conn:
-    #with conn.cursor() as curs:
-        #curs.execute("SELECT * FROM sp500")
+    #with engine.connect() as conn:
+        #conn.execute("SELECT * FROM sp500")
         sql_query = pd.read_sql_query("SELECT * FROM sp500", conn)
         #result = curs.fetchall()
     conn.close()
@@ -46,7 +46,8 @@ def Extract_error_data():
     df = df.set_index('Date')
     return df
 #if __name__ == "__main__":
-   # sql_query = Extract_data()
+    #sql_query = Extract_data()
+    #print(sql_query.iloc[-1 :].index.values[0])
     #df = pd.DataFrame(sql_query, columns = ['Date', 'Close'])
     #df = df.set_index('Date')
     #print(df)

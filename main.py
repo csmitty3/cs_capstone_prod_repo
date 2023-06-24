@@ -1,26 +1,21 @@
-from flask import Flask, render_template, request, send_file #, redirect, url_for,
-from flask_restful import Api #, Resource
+from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask_restful import Api, Resource
 import pickle
 import os
 import io
-#import base64
+import base64
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from datetime import date, datetime #, timedelta
-#import requests
-from sql_extract import Extract_data #, Extract_error_data
-from lstm_copy import df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict #,create_df
+from datetime import date, datetime, timedelta
+import requests
+from sql_extract import Extract_data
+from lstm_copy import df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict
 
 
 app = Flask(__name__)
 api = Api(app)
 
 fig, ax = plt.subplots(figsize=(7,2.5), facecolor='lightblue')
-df = Extract_data()
-today = date.today()
-today = datetime.strftime(today, "%Y-%m-%d")
-windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
-#dates, X, Y = windowed_df_to_date_X_y(windowed_df)
 
 @app.route('/')
 def welcome():
@@ -68,10 +63,13 @@ def visualize():
 def predict():
     if request.method=='POST':
         num = int(request.form['preds'])
-        #df = Extract_data()
+        df = Extract_data()
+        #before = today - timedelta(days=14)
+        #today = datetime.strftime(today, "%Y-%m-%d")
+        #before = datetime.strftime(before, "%Y-%m-%d")
         #today = date.today()
         #today = datetime.strftime(today, "%Y-%m-%d")
-        #windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
+        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', '2023-06-23', n=5)
         #dates, X, Y = windowed_df_to_date_X_y(windowed_df)
         dates, X, Y = windowed_df_to_date_X_y(windowed_df)
         with open('model.pkl', 'rb') as file:
