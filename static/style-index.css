@@ -3,5 +3,17 @@ body {
 }
 
 h2 {
+    color: indigo;
+    
+}
+h1 {
+    background-color: grey;
+    opacity: 0.6;
+    text-align: center;
     color: navy;
+    font-size: 42px;
+}
+
+footer {
+    font-size: 8px;
 }

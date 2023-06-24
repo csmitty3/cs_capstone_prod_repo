@@ -47,6 +47,6 @@ def Retrain_model():
     mle_analysis()
 
 if __name__ == "__main__":
-    Add_sql()
-    Calc_error()
+    #Add_sql()
+    #Calc_error()
     Retrain_model()

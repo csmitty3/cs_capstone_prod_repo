@@ -46,8 +46,7 @@ def Extract_error_data():
     df = df.set_index('Date')
     return df
 #if __name__ == "__main__":
-    #sql_query = Extract_data()
-    #print(sql_query)
+   # sql_query = Extract_data()
     #df = pd.DataFrame(sql_query, columns = ['Date', 'Close'])
     #df = df.set_index('Date')
     #print(df)

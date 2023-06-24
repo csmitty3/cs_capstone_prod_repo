@@ -4,17 +4,21 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='style-index.css') }}">
-    <title>Flask Docker</title>
+    <title>Stock Price Predictor</title>
   </head>
     <body>
-        <h2>HTML Forms</h2>
-
+        <h1>Stock Price LSTM Predictor</h1>
+        <div>
+          <p>This is a Full Stack Machine Learning Engineering web application that uses Deep Learning techniques to predict future stock prices from historical prices. This data looks specifically at S&P500 data.</p>
+        </div>
         <form action="/predict" method='post'>
-          <label for="preds">Number of Predictions:</label><br>
+          <label for="preds">Pick a number of days of future stock predictions to estimate:</label><br>
           <input type="text" id="preds" name="preds"><br>
           <input type="submit" value="Submit">
-        </form> 
-        
-        <p>If you click the "Submit" button, the form-data will be sent to a page called "/submit".</p>
+        </form>
+        <img src="{{ url_for('visualize') }}">
     </body>
+    <footer>
+      <p>This data is provided by <a href="https://site.financialmodelingprep.com/">Financial Modeling Prep</a></p>
+    </footer>
 </html>

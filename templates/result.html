@@ -3,11 +3,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Flask Docker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style-index.css') }}">
+    <title>Stock Price Predictor</title>
   </head>
-<h2>Final Results</h2>
-
 <body>
+  <h1>Stock Price LSTM Predictor</h1>
+  <h2>Final Results</h2>
     <table border=2>
         {% for key,value in result.items() %}
            <tr>
@@ -18,6 +19,15 @@
            </tr>  
          {% endfor %}
        </table>
+  <div>
+    <p>The stock data and deep learning model for this app are updated daily.</p>
+    <p>Long Short-Term Memory Neural Networks are utilized to predict this time series analysis.</p>
+  </div>
+  <br>
+  <div>
+    <p>Read this medium article for more information on the technology and methods used to create this app.</p>
+    <p>Reach out to me on <a href="https://www.linkedin.com/in/conor-smith-5936471b1/">LinkedIn</a> if you have any questions or feedback</p>
+  </div>
 </body>
-
+<footer><p><i>Disclosure: I recommend to not use methods here to invest in the market. Deep Learning methods like this are used, but what provides the advantage for traders is the proprietary data they may possess.</i></p></footer>
 </html>
