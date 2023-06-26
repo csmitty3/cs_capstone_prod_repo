@@ -1,6 +1,6 @@
 #import the relevant sql library 
 from sqlalchemy import create_engine, text
-from lstm_copy import normal_df, df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict, mle_analysis
+from lstm import normal_df, df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict, mle_analysis
 from sql_extract import Extract_data
 from datetime import date, timedelta, datetime
 import pickle
@@ -9,7 +9,7 @@ import pandas as pd
 
 def Get_data():
     """
-    This function calls the 'normal_df function from 'lstm_copy.py' which is used to pull in API data from Financial Modeling Prep
+    This function calls the 'normal_df function from 'lstm.py' which is used to pull in API data from Financial Modeling Prep
     This then takes and returns just the last row of data from that DataFrame
     """
     df = normal_df()
@@ -45,7 +45,7 @@ def Calc_error():
 
 def Retrain_model():
     """
-    Calls the 'mle_analysis' function from 'lstm_copy' to retrain the deep learning model with the latest data.
+    Calls the 'mle_analysis' function from 'lstm.py' to retrain the deep learning model with the latest data.
     """
     mle_analysis()
 

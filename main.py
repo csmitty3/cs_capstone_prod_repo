@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from datetime import date, datetime, timedelta
 import requests
 from sql_extract import Extract_data
-from lstm_copy import df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict
+from lstm import df_to_windowed_df, windowed_df_to_date_X_y, recursive_predict
 
 
 app = Flask(__name__)

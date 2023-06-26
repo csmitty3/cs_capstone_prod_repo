@@ -1,6 +1,6 @@
 #import the relevant sql library 
 from sqlalchemy import create_engine, text
-from lstm_copy import normal_df
+from lstm import normal_df
 import pandas as pd
 
 def Create_db():
