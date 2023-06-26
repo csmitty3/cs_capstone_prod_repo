@@ -50,8 +50,8 @@ def predict():
     if request.method=='POST':
         num = int(request.form['preds'])
         df = Extract_data()
-        df = df[-1: ]
-        index = df.index
+        df_index = df[-1: ]
+        index = df_index.index
         index_date = index.date[0]
         index_date = datetime.strftime(index_date, "%Y-%m-%d")
         windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', index_date, n=5)
