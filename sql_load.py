@@ -24,9 +24,5 @@ def Extract_data():
     df = df.set_index('Date')
     return df
 
-#Create_db()
-#Create_initial_data()
+
 #if __name__ == '__main__':
-    #df = Extract_data()
-    #print(type(df.index))
-    #Create_db()

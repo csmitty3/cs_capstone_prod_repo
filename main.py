@@ -38,8 +38,6 @@ def visualize():
     ax.spines['bottom'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.tick_params(axis='both', labelsize=5, length=0)
-    #plt.xticks(rotation=45)
-    #canvas = FigureCanvas(fig)
     img=io.BytesIO()
     fig.savefig(img)
     img.seek(0)
@@ -47,36 +45,21 @@ def visualize():
 
 
 
-#class PredictFive(Resource):
-    #def get(self):
-        #if request.method=='POST':
-            #num = int(requests.form['preds'])
-            #df = create_df()
-            #windowed_df = df_to_windowed_df(df, '2021-03-25', '2022-03-23', n=5)
-            #dates, X, Y = windowed_df_to_date_X_y(windowed_df)
-            #with open('model.pkl', 'rb') as file:
-                #model = pickle.load(file)
-            #recursive_predictions = recursive_predict(num, X, model)
-            #return redirect(url_for('predictions', result = recursive_predictions))
-
 @app.route("/predict", methods=['POST', "GET"])
 def predict():
     if request.method=='POST':
         num = int(request.form['preds'])
         df = Extract_data()
-        #before = today - timedelta(days=14)
-        #today = datetime.strftime(today, "%Y-%m-%d")
-        #before = datetime.strftime(before, "%Y-%m-%d")
-        #today = date.today()
-        #today = datetime.strftime(today, "%Y-%m-%d")
-        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', '2023-06-23', n=5)
-        #dates, X, Y = windowed_df_to_date_X_y(windowed_df)
+        df = df[-1: ]
+        index = df.index
+        index_date = index.date[0]
+        index_date = datetime.strftime(index_date, "%Y-%m-%d")
+        windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', index_date, n=5)
         dates, X, Y = windowed_df_to_date_X_y(windowed_df)
         with open('model.pkl', 'rb') as file:
             model = pickle.load(file)
         recursive_predictions = recursive_predict(num, X, model, scaler)
         return render_template('result.html', result=recursive_predictions)
-#api.add_resource(PredictFive, "/predict")
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
