@@ -33,20 +33,12 @@ import json
 from sql_extract import Extract_data
 from datetime import datetime, date, timedelta
 
-#scaler=MinMaxScaler(feature_range=(0,1))
 
-#read data in
 def get_jsonparsed_data(url):
     """
-    Receive the content of ``url``, parse it as JSON and return the object.
-
-    Parameters
-    ----------
-    url : str
-
-    Returns
-    -------
-    dict
+    Take contents of url call and parse as json
+    url- website to connect to(str)
+    return- json of the api call
     """
     response = requests.get(url)
 
@@ -56,11 +48,20 @@ def get_jsonparsed_data(url):
 
 #function to change string dates to datetime
 def str_to_datetime(s):
+    """
+    Takes a date in string format and returns in datetime format
+    s- a date(str)
+    return- a date(datetime)
+    """
     split = s.split('-')
     year, month, day = int(split[0]), int(split[1]), int(split[2])
     return datetime(year=year, month=month, day=day)
 
 def normal_df():
+    """
+    Calls Financial Modeling Prep API and obtains historical data for S&P500 + cleans up.
+    return- Pandas DataFrame with 'Date' as the index and 'Close' as the only column
+    """
     api_key= 'dee9e143b1d0b3ce72ab2bf088fbfab9'
     sp500='^GSPC'
     url = (f"https://financialmodelingprep.com/api/v3/historical-price-full/{sp500}?apikey={api_key}")
@@ -86,23 +87,29 @@ def normal_df():
     return df
 
 def create_df():
+    """
+    Extracts data from Postgres Database on Heroku and scales with a MinMaxScaler
+    returns- Pandas DataFrame
+    """
     scaler=MinMaxScaler(feature_range=(0,1))
     df = Extract_data()
-
-    #apply str_to_datetime
-    #df['Date'] = df['Date'].apply(str_to_datetime)
-
-    #set index
-    #df.set_index('Date', inplace=True)
-
-    #minmax scaler
     scaledclose=scaler.fit_transform(np.array(df).reshape(-1,1))
     df['Close'] = scaledclose
     df = df[['Close']]
     return df
 
-#Creating windowed dataframes
+
 def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3):
+    """
+    Takes S&P stock data and creates a windowed DataFrame
+    dataframe- Pandas DF with 'Date' index and 'Close' column
+    first_date_str- The starting date in the timeframe(str)
+    last_date_str- The last dat in the timeframe (str)
+    n- number of windows to create(int)(default = 3)
+    RETURNS
+    ret_df- Pandas DataFrame with windowed columns
+    scaler- If scaler was used in this step- will return to be used later to descale
+    """
     if dataframe['Close'].values[0] > 1:
         scaler=MinMaxScaler(feature_range=(0,1))
         scaledclose=scaler.fit_transform(np.array(dataframe).reshape(-1,1))
@@ -160,6 +167,14 @@ def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3):
     return ret_df, scaler
 
 def windowed_df_to_date_X_y(windowed_dataframe):
+    """
+    Takes windowed dataframe and returns the dates, X, and Y values
+    windowed_dataframe- A Pandas DF that has been put through the df_to_windowed_df function
+    RETURNS
+    dates- all dates in DF
+    X- All X values in DF(np.float32)
+    Y- All y values in DF(np.float32)
+    """
     df_as_np = windowed_dataframe.to_numpy()
 
     dates = df_as_np[:, 0]
@@ -171,8 +186,24 @@ def windowed_df_to_date_X_y(windowed_dataframe):
 
     return dates, X.astype(np.float32), Y.astype(np.float32)
 
-#plotting train, val, and test data
+
 def split_train_val_test(dates, X, y):
+    """
+    Splits dates, X, y into train val and test data- preparing for Deep Learning
+    dates-dates used for processing
+    X- all X values used for processing
+    y- all y values used for processing
+    RETURNS
+    dates_train- All dates within training data
+    X_train- All X values within training data
+    y_train- All y values within training data
+    dates_val- All dates within validation data
+    X_val- All X values within validation data
+    y_val- All y values within validation data
+    dates_test- All dates within test data
+    X_test- All X values with test data
+    y_test- All y values within test data
+    """
     q_80 = int(len(dates) * .8)
     q_90 = int(len(dates) * .9)
 
@@ -183,9 +214,30 @@ def split_train_val_test(dates, X, y):
 
     return dates_train, X_train, y_train, dates_val, X_val, y_val, dates_test, X_test, y_test
 
-# Updated bayesian_optimization function
+
 def bayesian_optimization(X_train, y_train, X_val, y_val):
+    """
+    Bayesian Optimization function used to find optimal hyperparameters for LSTM Neural Networks
+    X_train- List of X_train data
+    y_train- list of y_train data
+    X_val- List of X_val data
+    y_val- list of y_val data
+    RETURN 
+    learning_rate- optimal learning rate for model(float)
+    neurons- optimal neurons for model(int)
+    dropout_rate- optimal dropout_rate for model
+    activation- optimal type of activation for model(str)
+    """
     def define_model(learning_rate, neurons, dropout_rate, activation):
+        """
+        Helper function to define the model
+        learning_rate- learning rate for model(float)
+        neurons- neurons for model(int)
+        dropout_rate- dropout_rate for model
+        activation- type of activation for model(str)
+        RETURNS
+        model- model that these various hyperparams created
+        """
         activation_mapping = {0: 'relu', 1: 'sigmoid'}
         activation = activation_mapping[int(activation)]
         
@@ -215,6 +267,15 @@ def bayesian_optimization(X_train, y_train, X_val, y_val):
 
     # Define the objective function to be maximized
     def objective(learning_rate, neurons, dropout_rate, activation):
+        """
+        Define the objective function to be maximized(val_loss)
+        learning_rate- learning rate for model(float)
+        neurons- neurons for model(int)
+        dropout_rate- dropout_rate for model
+        activation- type of activation for model(str)
+        RETURNS
+        -val_loss- Result of the objective function
+        """
         model = define_model(learning_rate, int(neurons), dropout_rate, activation)
         model.fit(X_train, y_train, epochs=100, verbose=0)
         val_loss = model.evaluate(X_val, y_val, verbose=0)[0]
@@ -241,6 +302,29 @@ def bayesian_optimization(X_train, y_train, X_val, y_val):
 
 #Training model on best params
 def train_model(X_train, y_train, X_val, y_val, dates_val, X_test, y_test, dates_test, learning_rate, neurons, activation, dropout_rate):
+    """
+    Train most optimal model in a thorough fashion
+    dates_train- All dates within training data
+    X_train- All X values within training data
+    y_train- All y values within training data
+    dates_val- All dates within validation data
+    X_val- All X values within validation data
+    y_val- All y values within validation data
+    dates_test- All dates within test data
+    X_test- All X values with test data
+    y_test- All y values within test data
+    learning_rate- learning rate for model(float)
+    neurons- neurons for model(int)
+    dropout_rate- dropout_rate for model
+    activation- type of activation for model(str)
+    RETURNS
+    train_predictions- list of predictions the model makes on the training data
+    val_predictions- list of predictions the model makes on the validation data
+    test_predictions- list of predictions the model makes on the test data
+    recursive_predictions- list of predictions the model makes on data recursively
+    train_predictions- list of predictions the model makes on the training data
+    model- The model used for these predictions
+    """
     model = Sequential([layers.Input((X_train.shape[1], 1)),
                         layers.LSTM(neurons),
                         layers.Dense(32, activation=activation),
@@ -272,6 +356,9 @@ def train_model(X_train, y_train, X_val, y_val, dates_val, X_test, y_test, dates
 
 class TestCalc(unittest.TestCase):
     def test_recursive(self):
+        """
+        Unit Testing on recursive data- making sure length of result is equal to val+test predictions
+        """
         windowed_df = df_to_windowed_df(df, '2021-03-25', '2022-03-23', n=5)
         dates, X, y = windowed_df_to_date_X_y(windowed_df)
         dates_train, X_train, y_train, dates_val, X_val, y_val, dates_test, X_test, y_test = split_train_val_test(dates, X, y)
@@ -281,12 +368,24 @@ class TestCalc(unittest.TestCase):
         self.assertEqual(result, len(val_predictions) + len(test_predictions))
     
     def test_split_train_val(self):
-        windowed_df = df_to_windowed_df(df_new, '2021-03-25', '2022-03-23', n=5)
+        """
+        Unit Testing on splt_train_val data
+        """
+        windowed_df = df_to_windowed_df(df, '2021-03-25', '2022-03-23', n=5)
         dates, X, y = windowed_df_to_date_X_y(windowed_df)
         dates_train, X_train, y_train, dates_val, X_val, y_val, dates_test, X_test, y_test = split_train_val_test(dates, X, y)
         self.assertEqual(len(X_train), len(y_train))
 
 def recursive_predict(num, data, model, scaler):
+    """
+    Creates predictions recursively that can be used to predict the next values of S&P500 data
+    num- number of predictions
+    data- current historical data
+    model- model to be used
+    scaler- Need to be used to convert data back to correct values
+    RETURN
+    recursive_dictionary- dictionary of recursive predictions
+    """
     recursive_predictions = []
     last_window = deepcopy(data[-1])
     for i in range(num):
@@ -305,14 +404,14 @@ def recursive_predict(num, data, model, scaler):
 
 #function to run the whole script
 def mle_analysis():
+    """
+    Function used to run multiple of the functions above and retrain the deep learning model
+    Takes final results and pickleizes the model and saves it to be used for future predictions
+    """
     df= create_df()
     today = date.today()-timedelta(days=1)
     today = datetime.strftime(today, "%Y-%m-%d")
     windowed_df, scaler = df_to_windowed_df(df, '2022-01-10', today, n=5)
-    #print(windowed_df)
-    #print(type(windowed_df))
-    #windowed_df = pd.DataFrame([windowed_df])
-    #print(type(windowed_df))
     dates, X, y = windowed_df_to_date_X_y(windowed_df)
     dates_train, X_train, y_train, dates_val, X_val, y_val, dates_test, X_test, y_test = split_train_val_test(dates, X, y)
     learning_rate, neurons, dropout_rate, activation = bayesian_optimization(X_train, y_train, X_val, y_val)

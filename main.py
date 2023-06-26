@@ -27,6 +27,10 @@ def predictions(result):
 
 @app.route('/visualize')
 def visualize():
+    """
+    Creates graph to be displayed on inital page of application
+    Sends matplotlib graph to html page to display line chart
+    """
     df = Extract_data()
     ax.plot(df, color='#A45EE5')
     ax.set_facecolor("lightblue")
@@ -47,6 +51,9 @@ def visualize():
 
 @app.route("/predict", methods=['POST', "GET"])
 def predict():
+    """
+    When a number of predictions is give- Runs functions need to recrusively predict
+    """
     if request.method=='POST':
         num = int(request.form['preds'])
         df = Extract_data()

@@ -5,6 +5,10 @@ import psycopg2
 
 
 def Extract_data():
+    """
+    Function used to extract all data from the Postgres database on Heroku.
+    This returns a pandas DataFrame with 'Date' as the Index and 'Close' as the only column.
+    """
     with psycopg2.connect(host="ec2-54-156-8-21.compute-1.amazonaws.com",
         database="df050o1ta4o7ba",
         user="eeedbjazwbtsbo",
@@ -18,6 +22,10 @@ def Extract_data():
     return df
 
 def Extract_error_data():
+    """
+    Function used to extract all data from the Postgres database calculating error on Heroku.
+    This returns a pandas DataFrame with 'Date' as the Index and 'Error' as the only column.
+    """
     with psycopg2.connect(host="ec2-54-156-8-21.compute-1.amazonaws.com",
         database="df050o1ta4o7ba",
         user="eeedbjazwbtsbo",
